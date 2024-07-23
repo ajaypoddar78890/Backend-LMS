@@ -11,10 +11,10 @@ const __dirname = dirname(__filename);
 // Set the storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads"));
+    cb(null, path.join(__dirname, "../uploads")); // Specify the destination folder
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+    cb(null, file.originalname); // Use the original file name
   },
 });
 

@@ -34,11 +34,9 @@ app.use(
 
 // Serving the static files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Route to handle SCORM file upload
 app.post("/api/uploads", upload.single("file"), (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, entryFile } = req.body;
     const zipFilePath = path.join(__dirname, "uploads", req.file.filename);
     const extractPath = path.join(
       __dirname,
@@ -51,10 +49,11 @@ app.post("/api/uploads", upload.single("file"), (req, res) => {
       .pipe(unzipper.Extract({ path: extractPath }))
       .on("close", async () => {
         try {
-          // Assuming the SCORM package has an 'index.html' or main entry point
+          // Use the provided entry file or default to index.html
+          const entryPoint = entryFile || "index_lms.html";
           const videoUrl = `/uploads/${req.file.filename.replace(
             ".zip",
-            "/index.html"
+            `/${entryPoint}`
           )}`;
 
           const newCourse = new Course({
