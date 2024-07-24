@@ -27,12 +27,12 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "http://localhost:5500"],
     credentials: true,
   })
 );
 
-// Serving the static files
+// Serving the static filess
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.post("/api/uploads", upload.single("file"), (req, res) => {
   try {
