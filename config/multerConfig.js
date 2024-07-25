@@ -1,4 +1,3 @@
-// multerConfig.js
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -30,14 +29,14 @@ const checkFileType = (file, cb) => {
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb("Error: ZIP files only!");
+    return cb(new Error("Error: ZIP files only!")); // Use Error object for better error handling
   }
 };
 
 // Init upload
 const upload = multer({
   storage,
-  limits: { fileSize: 100000000 }, // Limit file size to 100MB
+  limits: { fileSize: 1024 * 1024 * 1024 }, // Limit file size to 1 GB
   fileFilter: (req, file, cb) => {
     checkFileType(file, cb);
   },

@@ -7,22 +7,18 @@ import path from "path";
 import fs from "fs";
 import unzipper from "unzipper";
 
-import Course from "./model/CourseSchema.js"; // Use default import for Course
-import upload from "./config/multerConfig.js"; // Import the multer configuration
+import Course from "./model/CourseSchema.js";
+import upload from "./config/multerConfig.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-// Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 const PORT = process.env.PORT || 5500;
 
-// Config
 const app = express();
 dotenv.config();
 
-// Middleware
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(
@@ -32,10 +28,16 @@ app.use(
   })
 );
 
-// Serving the static filess
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Handling file upload
 app.post("/api/uploads", upload.single("file"), (req, res) => {
   try {
+    if (!req.file) {
+      throw new Error("No file uploaded.");
+    }
+
+    console.log("Uploaded file:", req.file); // Debug log
     const { title, description, entryFile } = req.body;
     const zipFilePath = path.join(__dirname, "uploads", req.file.filename);
     const extractPath = path.join(
@@ -44,12 +46,10 @@ app.post("/api/uploads", upload.single("file"), (req, res) => {
       req.file.filename.replace(".zip", "")
     );
 
-    // Extract the ZIP file
     fs.createReadStream(zipFilePath)
       .pipe(unzipper.Extract({ path: extractPath }))
       .on("close", async () => {
         try {
-          // Use the provided entry file or default to index.html
           const entryPoint = entryFile || "index_lms.html";
           const videoUrl = `/uploads/${req.file.filename.replace(
             ".zip",
@@ -64,7 +64,6 @@ app.post("/api/uploads", upload.single("file"), (req, res) => {
 
           const course = await newCourse.save();
 
-          // Clean up the ZIP file
           fs.unlink(zipFilePath, (err) => {
             if (err) console.error("Failed to delete ZIP file:", err);
           });
@@ -85,7 +84,12 @@ app.post("/api/uploads", upload.single("file"), (req, res) => {
   }
 });
 
-// Connecting to the DB
+// Example of a SCORM API endpoint
+app.post("/scorm-api/save-data", (req, res) => {
+  const scormData = req.body;
+  res.status(200).send({ message: "Data saved successfully", scormData });
+});
+
 const connect = async () => {
   try {
     await mongoose.connect(process.env.MONGO);
@@ -95,7 +99,6 @@ const connect = async () => {
   }
 };
 
-// Routes
 app.get("/api/courses", async (req, res) => {
   try {
     const courses = await Course.find({});
