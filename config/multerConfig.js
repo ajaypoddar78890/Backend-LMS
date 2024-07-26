@@ -3,40 +3,34 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-// Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Set the storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads")); // Specify the destination folder
+    const uploadPath = path.join(__dirname, "../uploads");
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname); // Use the original file name
+    cb(null, file.originalname);
   },
 });
 
-// Check file type
 const checkFileType = (file, cb) => {
-  // Allowed ext
   const filetypes = /zip/;
-  // Check ext
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  // Check mime
   const mimetype = filetypes.test(file.mimetype);
 
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    return cb(new Error("Error: ZIP files only!")); // Use Error object for better error handling
+    return cb(new Error("Error: ZIP files only!"));
   }
 };
 
-// Init upload
 const upload = multer({
   storage,
-  limits: { fileSize: 1024 * 1024 * 1024 }, // Limit file size to 1 GB
+  limits: { fileSize: 5 * 1024 * 1024 * 1024 }, // Limit file size to 5 GB
   fileFilter: (req, file, cb) => {
     checkFileType(file, cb);
   },
