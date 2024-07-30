@@ -1,76 +1,88 @@
-(function(window) {
-  var SCORM = {
-    API: null,
-
-    // Initialize SCORM
-    initialize: function() {
-      if (this.API) {
-        console.log("SCORM already initialized.");
-        return true;
-      }
-
-      // Locate SCORM API
-      var api = this.findAPI(window);
-      if (api) {
-        this.API = api;
-        return api.LMSInitialize("");
-      }
-      
-      console.error("SCORM API not found.");
-      return false;
+(function (window) {
+  window.SCORM = {
+    initialize: function () {
+      console.log("SCORM initialized");
+      return true;
     },
-
-    // Terminate SCORM
-    terminate: function() {
-      if (this.API) {
-        return this.API.LMSFinish("");
-      }
-      console.error("SCORM API not initialized.");
-      return false;
+    terminate: function () {
+      console.log("SCORM terminated");
+      return true;
     },
-
-    // Get value from SCORM
-    getValue: function(name) {
-      if (this.API) {
-        return this.API.LMSGetValue(name);
-      }
-      console.error("SCORM API not initialized.");
-      return "";
+    getValue: function (key) {
+      console.log(`SCORM getValue: ${key}`);
+      return "some value";
     },
-
-    // Set value to SCORM
-    setValue: function(name, value) {
-      if (this.API) {
-        return this.API.LMSSetValue(name, value);
-      }
-      console.error("SCORM API not initialized.");
-      return false;
+    setValue: function (key, value) {
+      console.log(`SCORM setValue: ${key} = ${value}`);
+      window.parent.postMessage(
+        { type: "scorm", payload: { key, value } },
+        "*"
+      );
+      return true;
     },
-
-    // Commit values to SCORM
-    commit: function() {
-      if (this.API) {
-        return this.API.LMSCommit("");
-      }
-      console.error("SCORM API not initialized.");
-      return false;
+    commit: function () {
+      console.log("SCORM commit");
+      return true;
     },
-
-    // Find SCORM API
-    findAPI: function(win) {
-      var api = null;
-      while (win && !api) {
-        if (win.API) {
-          api = win.API;
-        } else if (win.parent && win.parent !== win) {
-          win = win.parent;
-        } else {
-          win = win.parent;
-        }
-      }
-      return api;
-    }
   };
-
-  window.SCORM = SCORM;
 })(window);
+
+// document.addEventListener("DOMContentLoaded", () => {
+//   if (window.SCORM) {
+//     const scormInitialized = window.SCORM.initialize();
+//     if (scormInitialized) {
+//       console.log("SCORM initialized successfully");
+//       window.SCORM.setValue("cmi.core.lesson_status", "incomplete");
+//       window.SCORM.commit();
+//       const lessonStatus = window.SCORM.getValue("cmi.core.lesson_status");
+//       console.log("Lesson Status:", lessonStatus);
+//     } else {
+//       alert("Unable to acquire the LMS API. Content may not play correctly.");
+//     }
+//   } else {
+//     alert("SCORM API not found. Content may not play correctly.");
+//   }
+
+//   // Add event listeners for user interactions
+//   document.getElementById("startButton").addEventListener("click", (event) => {
+//     trackUserInteraction("click", {
+//       element: event.target.tagName,
+//       id: event.target.id,
+//       class: event.target.className,
+//     });
+//   });
+
+//   const video = document.getElementById("courseVideo");
+//   video.addEventListener("play", () => {
+//     trackUserInteraction("videoPlay", { id: video.id });
+//   });
+//   video.addEventListener("pause", () => {
+//     trackUserInteraction("videoPause", { id: video.id });
+//   });
+//   video.addEventListener("ended", () => {
+//     trackUserInteraction("videoEnded", { id: video.id });
+//   });
+// });
+
+// function trackUserInteraction(eventType, eventData) {
+//   const scormData = {
+//     userId: "user-id-here",
+//     courseId: "course-id-here",
+//     eventType: eventType,
+//     eventData: {
+//       ...eventData,
+//       timestamp: new Date().toISOString(),
+//     },
+//   };
+
+//   fetch("http://localhost:5500/scorm-api/save-data", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify(scormData),
+//   })
+//     .then((response) => response.json())
+//     .then((data) => console.log("Data sent successfully:", data))
+//     .catch((error) => console.error("Error sending data:", error));
+// }
