@@ -185,7 +185,7 @@ app.use(
 );
 
 // Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -259,11 +259,6 @@ app.post("/api/uploads", upload.single("file"), async (req, res) => {
     }
     res.status(500).json({ error: "Failed to handle file upload" });
   }
-});
-
-app.post("/scorm-api/save-data", (req, res) => {
-  const scormData = req.body;
-  res.status(200).json({ message: "Data saved successfully", scormData });
 });
 
 const connect = async () => {
