@@ -163,6 +163,7 @@ import unzipper from "unzipper";
 import http from "http";
 
 import Course from "./model/CourseSchema.js";
+import scormData from "./model/ScormDataSchema.js"; // Ensure this schema is correctly defined
 import upload from "./config/multerConfig.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -179,8 +180,9 @@ app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5500"],
-    credentials: true,
+    origin: "*", // Allow all origins
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Allow all standard HTTP methods
   })
 );
 
@@ -258,6 +260,26 @@ app.post("/api/uploads", upload.single("file"), async (req, res) => {
       console.error("Failed to delete ZIP file on error:", unlinkErr);
     }
     res.status(500).json({ error: "Failed to handle file upload" });
+  }
+});
+
+// SCORM data endpoint
+app.post("/scormapi/savedata", async (req, res) => {
+  try {
+    const { key, value } = req.body;
+
+    if (!key || !value) {
+      return res.status(400).send("Invalid SCORM data");
+    }
+
+    const newScormData = new scormData({ key, value });
+    await newScormData.save();
+
+    console.log("SCORM data saved:", newScormData);
+    res.status(200).json(newScormData);
+  } catch (error) {
+    console.error("Error saving SCORM data:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
