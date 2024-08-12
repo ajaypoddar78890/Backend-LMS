@@ -178,13 +178,14 @@ dotenv.config();
 app.use(morgan("dev"));
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
-app.use(
-  cors({
-    origin: "*", // Allow all origins
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Allow all standard HTTP methods
-  })
-);
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // Adjust this for security
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
 
 // Serve static files from the 'public' directory
 app.use(express.static("public"));
