@@ -272,6 +272,7 @@ app.post("/scormapi/savedata", async (req, res) => {
   try {
     const { key, value } = req.body;
 
+    
     if (!key || !value) {
       return res.status(400).send("Invalid SCORM data");
     }
