@@ -187,6 +187,20 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(
+  cors({
+    origin: "*", // Use "*" for testing, but specify the correct domain in production.
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // Enable if required for authentication
+    preflightContinue: true, // Ensure preflight OPTIONS requests are handled
+    optionsSuccessStatus: 204,
+  })
+);
+
+// Handle OPTIONS requests globally if needed for CORS
+app.options("*", cors());
+
 // // Serve static files from the 'public' directory
 // app.use(express.static("public"));
 
@@ -272,7 +286,6 @@ app.post("/scormapi/savedata", async (req, res) => {
   try {
     const { key, value } = req.body;
 
-    
     if (!key || !value) {
       return res.status(400).send("Invalid SCORM data");
     }
